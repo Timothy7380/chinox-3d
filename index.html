@@ -106,11 +106,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 section:not(.in) .float{animation-play-state:paused}
 /* product stage: sprite-sheet turntables that fly between DOM anchors (transform-only) */
 body{position:relative}
-#stage{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;z-index:1;overflow:hidden;contain:strict}
+#stage{position:absolute;left:0;top:0;width:100%;height:0;pointer-events:none;z-index:1}
 .flyer{position:absolute;left:0;top:0;transform-origin:50% 50%;will-change:transform;visibility:hidden}
-.flyer .spin{position:relative;overflow:hidden;animation:bob 5s ease-in-out infinite}
+.flyer .spin{position:relative;background-repeat:no-repeat;animation:bob 5s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-8px)}}
-.flyer .strip{position:absolute;left:0;top:0;max-width:none;will-change:transform}
 .flyer .shadow{position:absolute;left:12%;right:12%;bottom:-5%;height:12%;border-radius:50%;background:radial-gradient(closest-side,rgba(43,40,41,.28),transparent);z-index:-1}
 .anchor{touch-action:pan-y;cursor:grab}
 .anchor:active{cursor:grabbing}
@@ -189,9 +188,7 @@ body{position:relative}
 /* ---------- trio ---------- */
 .trio{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:40px;padding-block:96px 72px;background:#F4EEEA}
 .trio-left{position:relative;z-index:2;display:flex;flex-direction:column;align-items:flex-start;gap:16px;min-width:0}
-.receipt{width:min(300px,100%);background:#fff;font-size:12px;line-height:1.7;padding:16px 16px 22px;box-shadow:0 20px 40px -24px rgba(43,40,41,.5);
-  -webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - 8px) no-repeat, radial-gradient(circle 5px at 7px 100%, transparent 98%, #000) bottom/14px 8px repeat-x;
-  mask:linear-gradient(#000 0 0) top/100% calc(100% - 8px) no-repeat, radial-gradient(circle 5px at 7px 100%, transparent 98%, #000) bottom/14px 8px repeat-x}
+.receipt{width:min(300px,100%);background:#fff;font-size:12px;line-height:1.7;padding:16px 16px 22px;box-shadow:0 20px 40px -24px rgba(43,40,41,.5);}
 .receipt .rh{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:8px;margin-bottom:8px;font-weight:600}
 .receipt .row{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}
 .receipt .tot{border-top:1px dashed var(--line);margin-top:8px;padding-top:8px;font-weight:700;font-size:14px}
@@ -367,10 +364,10 @@ body{position:relative}
 </div>
 
 <div id="stage" aria-hidden="true">
-  <div class="flyer" data-id="cer"><div class="spin"><div class="shadow"></div><img class="strip" data-img="s_cer" alt=""></div></div>
-  <div class="flyer" data-id="ret"><div class="spin"><div class="shadow"></div><img class="strip" data-img="s_ret" alt=""></div></div>
-  <div class="flyer" data-id="tur"><div class="spin"><div class="shadow"></div><img class="strip" data-img="s_tur" alt=""></div></div>
-  <div class="flyer" data-id="bag"><div class="spin"><div class="shadow"></div><img class="strip" data-img="s_bag" alt=""></div></div>
+  <div class="flyer" data-id="cer"><div class="spin" data-sprite="s_cer"><div class="shadow"></div></div></div>
+  <div class="flyer" data-id="ret"><div class="spin" data-sprite="s_ret"><div class="shadow"></div></div></div>
+  <div class="flyer" data-id="tur"><div class="spin" data-sprite="s_tur"><div class="shadow"></div></div></div>
+  <div class="flyer" data-id="bag"><div class="spin" data-sprite="s_bag"><div class="shadow"></div></div></div>
 </div>
 
 <!-- ============ NAV ============ -->
@@ -416,11 +413,11 @@ body{position:relative}
   <!-- ============ 01 CERAMIDE ============ -->
   <section class="wrap chapter" id="ceramide" data-scene="cer">
     <div class="bits" aria-hidden="true">
-      <img class="float" data-img="pearl" alt="" style="left:6%;top:16%;--s:54px;--t:7s">
-      <img class="float" data-img="drop" alt="" style="left:44%;top:12%;--s:40px;--t:6s;--dl:-2s">
-      <img class="float" data-img="pearl" alt="" style="right:8%;top:20%;--s:30px;--t:5s">
-      <img class="float" data-img="drop" alt="" style="right:14%;bottom:12%;--s:56px;--t:8s;--dl:-3s">
-      <img class="float" data-img="pearl" alt="" style="left:38%;bottom:8%;--s:36px;--t:6.5s">
+      <img data-img="pearl" alt="" style="left:6%;top:16%;--s:54px;--t:7s">
+      <img data-img="drop" alt="" style="left:44%;top:12%;--s:40px;--t:6s;--dl:-2s">
+      <img data-img="pearl" alt="" style="right:8%;top:20%;--s:30px;--t:5s">
+      <img data-img="drop" alt="" style="right:14%;bottom:12%;--s:56px;--t:8s;--dl:-3s">
+      <img data-img="pearl" alt="" style="left:38%;bottom:8%;--s:36px;--t:6.5s">
     </div>
     <div class="ch-text" data-rv>
       <div class="eyebrow"><span>01 / 03</span><span>Barrier</span></div>
@@ -440,11 +437,11 @@ body{position:relative}
   <!-- ============ 02 RETINOL ============ -->
   <section class="wrap chapter flip" id="retinol" data-scene="ret">
     <div class="bits" aria-hidden="true">
-      <img class="float" data-img="capsule" alt="" style="right:8%;top:14%;--s:60px;--t:7s">
-      <img class="float" data-img="capsule" alt="" style="left:46%;top:10%;--s:38px;--t:5.5s;--dl:-2s">
-      <img class="float" data-img="lilac" alt="" style="left:6%;top:22%;--s:34px;--t:6s">
-      <img class="float" data-img="capsule" alt="" style="left:10%;bottom:10%;--s:48px;--t:8s;--dl:-4s">
-      <img class="float" data-img="lilac" alt="" style="right:20%;bottom:8%;--s:28px;--t:6s">
+      <img data-img="capsule" alt="" style="right:8%;top:14%;--s:60px;--t:7s">
+      <img data-img="capsule" alt="" style="left:46%;top:10%;--s:38px;--t:5.5s;--dl:-2s">
+      <img data-img="lilac" alt="" style="left:6%;top:22%;--s:34px;--t:6s">
+      <img data-img="capsule" alt="" style="left:10%;bottom:10%;--s:48px;--t:8s;--dl:-4s">
+      <img data-img="lilac" alt="" style="right:20%;bottom:8%;--s:28px;--t:6s">
     </div>
     <div class="ch-text" data-rv>
       <div class="eyebrow"><span>02 / 03</span><span>Renewal</span></div>
@@ -464,11 +461,11 @@ body{position:relative}
   <!-- ============ 03 TURMERIC ============ -->
   <section class="wrap chapter wide" id="turmeric" data-scene="tur">
     <div class="bits" aria-hidden="true">
-      <img class="float" data-img="chunk" alt="" style="left:6%;top:14%;--s:56px;--t:7s">
-      <img class="float" data-img="salt" alt="" style="left:30%;top:9%;--s:30px;--t:5s">
-      <img class="float" data-img="chunk" alt="" style="right:10%;top:16%;--s:46px;--t:6s;--dl:-2s">
-      <img class="float" data-img="salt" alt="" style="right:26%;top:62%;--s:34px;--t:6.5s">
-      <img class="float" data-img="chunk" alt="" style="left:22%;top:60%;--s:40px;--t:8s;--dl:-3s">
+      <img data-img="chunk" alt="" style="left:6%;top:14%;--s:56px;--t:7s">
+      <img data-img="salt" alt="" style="left:30%;top:9%;--s:30px;--t:5s">
+      <img data-img="chunk" alt="" style="right:10%;top:16%;--s:46px;--t:6s;--dl:-2s">
+      <img data-img="salt" alt="" style="right:26%;top:62%;--s:34px;--t:6.5s">
+      <img data-img="chunk" alt="" style="left:22%;top:60%;--s:40px;--t:8s;--dl:-3s">
     </div>
     <div class="bigword-wrap"><p class="bigword fit" aria-hidden="true">TURMER<i>IC</i></p></div>
     <figure class="post" data-rv>
@@ -857,8 +854,8 @@ const flyers = {};
 $$('.flyer').forEach(el=>{
   const id = el.dataset.id, sp = SPR[id];
   const spin = $('.spin', el); spin.style.width = sp.w+'px'; spin.style.height = sp.h+'px';
-  const strip = $('.strip', el); strip.style.width = sp.w*COLS+'px'; strip.style.height = sp.h*ROWS+'px';
-  flyers[id] = {id, el, strip, sp, x:0, y:0, s:0, rz:0, ang:Math.random()*TAU, vel:0, frame:-1, shown:false, placed:false, tf:''};
+  spin.style.backgroundImage = `url(${IMG[spin.dataset.sprite]})`; spin.style.backgroundSize = `${sp.w*COLS}px ${sp.h*ROWS}px`;
+  flyers[id] = {id, el, spin, sp, x:0, y:0, s:0, rz:0, ang:Math.random()*TAU, vel:0, frame:-1, shown:false, placed:false, tf:''};
 });
 const pagePos = el => { let x=0, y=0; for(let e=el; e; e=e.offsetParent){ x+=e.offsetLeft; y+=e.offsetTop; } return {x, y}; };
 let SC = [], AN = {};
@@ -924,7 +921,7 @@ function tick(now){
     if(!show) continue;
     if(dragId !== id){ f.ang += (reduce ? 0 : 0.5*dt) + f.vel*dt; f.vel *= Math.pow(.25, dt); }
     const fr = Math.floor((((f.ang % TAU)+TAU)%TAU)/TAU*NF) % NF;
-    if(fr !== f.frame){ f.strip.style.transform = `translate3d(${-(fr%COLS)*f.sp.w}px,${-Math.floor(fr/COLS)*f.sp.h}px,0)`; f.frame = fr; }
+    if(fr !== f.frame){ f.spin.style.backgroundPosition = `${-(fr%COLS)*f.sp.w}px ${-Math.floor(fr/COLS)*f.sp.h}px`; f.frame = fr; }
     const tf = `translate3d(${(f.x - f.sp.w/2).toFixed(1)}px,${(f.y - f.sp.h/2).toFixed(1)}px,0) rotate(${f.rz.toFixed(2)}deg) scale(${f.s.toFixed(4)})`;
     if(tf !== f.tf){ f.el.style.transform = tf; f.tf = tf; }
   }
