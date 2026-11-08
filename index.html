@@ -1,0 +1,1064 @@
+TEST123<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Chinox Cosmetics: authentic skincare from the UK, US and Korea. A 3D concept redesign.">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Chinox Cosmetics</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,200;1,300;1,400;1,500;1,600;1,800&display=swap" rel="stylesheet">
+<style>
+/* Layout: a fixed WebGL stage sits between two layers of a scrolling editorial page.
+   Each 3D product "rides" a DOM anchor in the active section and flies between them. */
+:root{
+  --paper:#F7F5F2;
+  --ink:#2B2829;
+  --red:#E0161E;
+  --muted:#6F6869;
+  --line:rgba(43,40,41,.16);
+  --card:#FFFFFF;
+  --cer:#E3ECF4; --cer-deep:#2F4C68; --cer-acc:#8DB7DD;
+  --ret:#EDE3F0; --ret-deep:#4A2448; --ret-acc:#E3A93B;
+  --tur:#F7E2B2; --tur-deep:#A8460C; --tur-acc:#E8902A;
+  --f-display:"Poppins", "Helvetica Neue", Arial, sans-serif;
+  --f-body:"Poppins", "Helvetica Neue", Arial, sans-serif;
+  --f-mono:"Poppins", "Helvetica Neue", Arial, sans-serif;
+  --gut-l:max(16px, env(safe-area-inset-left, 0px));
+  --gut-r:max(16px, env(safe-area-inset-right, 0px));
+  color-scheme:light;
+}
+@media (min-width:900px){ :root{ --gut-l:max(40px, env(safe-area-inset-left, 0px)); --gut-r:max(40px, env(safe-area-inset-right, 0px)); } }
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html.locked, html.locked body{overflow:hidden}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:14.5px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--red);outline-offset:3px}
+
+main,.foot{overflow-x:clip}
+#stage{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;display:block}
+.back{position:relative;z-index:0}
+.front{position:relative;z-index:2}
+
+.eyebrow{font-family:var(--f-body);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase}
+.mono{font-family:var(--f-mono)}
+
+/* ---------- nav ---------- */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.nav{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:8;display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:18px;padding-left:var(--gut-l);padding-right:var(--gut-r)}
+.logo{display:inline-flex;align-items:baseline;text-decoration:none;font-family:var(--f-display);line-height:1;gap:0}
+.logo .chi{font-style:italic;font-weight:300;font-size:22px;color:var(--ink);letter-spacing:-.03em}
+.logo .nox{font-weight:800;font-size:22px;color:var(--red);letter-spacing:-.04em}
+.logo small{font-family:var(--f-body);font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--muted);margin-left:8px;align-self:center}
+.nav-links{display:flex;gap:28px}
+.nav-links a{text-decoration:none;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;opacity:.75}
+.nav-links a:hover{opacity:1}
+.bagbtn{display:inline-flex;align-items:center;gap:8px;border:0;background:none;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;padding:6px 0;text-decoration:none}
+.bagbtn .count{display:inline-grid;place-items:center;min-width:22px;height:22px;border-radius:11px;background:var(--ink);color:#fff;font-size:11px;letter-spacing:0;padding:0 6px;transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
+.bagbtn .count.bump{transform:scale(1.35);background:var(--red)}
+@media (max-width:760px){ .nav-links{display:none} .logo small{display:none} }
+
+/* ---------- intro / tag ---------- */
+#intro{position:fixed;inset:0;z-index:20;background:var(--paper);overflow:hidden;transition:transform 1s cubic-bezier(.7,0,.2,1);touch-action:none}
+#intro.gone{transform:translateY(-100%)}
+.intro-top{position:absolute;top:calc(env(safe-area-inset-top,0px) + 18px);left:var(--gut-l);right:var(--gut-r);display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+.intro-top .label{font-size:10px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+.string{position:absolute;left:50%;top:0;width:1.5px;margin-left:-.75px;background:linear-gradient(var(--ink),rgba(43,40,41,.55));height:200px}
+#intro.snap .string{transition:height .35s cubic-bezier(.5,0,.9,.4);height:0!important}
+.tagwrap{position:absolute;left:50%;top:0;perspective:900px}
+.tag{position:absolute;left:0;top:0;width:150px;height:236px;transform-origin:50% 20px;transform-style:preserve-3d;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;outline:none}
+.tag:active{cursor:grabbing}
+.tag:focus-visible .tag-face.f{outline:2px solid var(--red);outline-offset:4px}
+.tag-face{position:absolute;inset:0;border-radius:10px 10px 6px 6px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;padding:42px 14px 16px;box-shadow:0 18px 40px -16px rgba(43,40,41,.55)}
+.tag-face.f{background:linear-gradient(160deg,#36302F,#211D1E);color:#F4EFEA}
+.tag-face.b{background:var(--red);color:#fff;transform:rotateY(180deg);justify-content:center;text-align:center;gap:8px}
+.tag-face::before{content:"";position:absolute;top:12px;left:50%;width:16px;height:16px;margin-left:-8px;border-radius:50%;background:var(--paper);box-shadow:0 0 0 3px #C9C1B8, inset 0 1px 2px rgba(0,0,0,.4)}
+.tag .tl{font-family:var(--f-display);line-height:.9;display:flex;align-items:baseline}
+.tag .tl i{font-weight:200;font-size:36px;color:#fff;letter-spacing:-.03em}
+.tag .tl b{font-weight:800;font-size:36px;color:var(--red);letter-spacing:-.05em}
+.tag .tc{font-family:var(--f-display);font-weight:500;font-size:9px;text-transform:uppercase;letter-spacing:.5em;margin-top:8px;opacity:.85}
+.tag .rule{width:100%;height:1px;background:rgba(255,255,255,.22);margin:18px 0 12px}
+.tag .tm{font-size:8.5px;letter-spacing:.24em;text-transform:uppercase;opacity:.75;text-align:center;line-height:1.9}
+.tag .bar{margin-top:auto;width:84px;height:22px;background:repeating-linear-gradient(90deg,#F4EFEA 0 2px,transparent 2px 4px,#F4EFEA 4px 5px,transparent 5px 8px);opacity:.75}
+.tag-face.b p{font-family:var(--f-display);font-weight:800;font-size:22px;line-height:1.02;letter-spacing:-.04em;margin:0}
+.tag-face.b p em{font-weight:200;font-style:italic}
+.tag-face.b small{font-size:8.5px;letter-spacing:.24em;text-transform:uppercase}
+.intro-hint{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 40px);left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px;font-size:10px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;white-space:nowrap}
+.intro-hint .track{width:150px;height:1px;background:var(--line);overflow:hidden}
+.intro-hint .track i{display:block;height:100%;background:var(--ink);transform-origin:left;transform:scaleX(0)}
+.skip{position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 34px);right:var(--gut-r);background:none;border:0;font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);text-decoration:underline;text-underline-offset:4px}
+@media (max-width:560px){ .skip{bottom:calc(env(safe-area-inset-bottom,0px) + 12px)} }
+
+/* ---------- shared section ---------- */
+.sec{position:relative;min-height:100svh;padding-left:var(--gut-l);padding-right:var(--gut-r)}
+
+/* ---------- hero ---------- */
+.hero{display:grid;grid-template-rows:auto 1fr auto;padding-block:88px 24px;gap:20px}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+.hero h1{font-family:var(--f-body);font-weight:700;font-size:clamp(22px,2.5vw,34px);line-height:1.08;letter-spacing:-.045em;max-width:14ch;text-wrap:balance;margin:0}
+.hero h1 em{font-family:var(--f-display);font-weight:200;font-style:italic;color:var(--red);letter-spacing:-.03em}
+.hero .sub{margin:12px 0 0;color:var(--muted);max-width:34ch;font-size:14px}
+.mini{list-style:none;margin:0;padding:0;display:grid;gap:6px;min-width:230px}
+.mini li{display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:10px;background:rgba(255,255,255,.7);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:999px;padding:7px 8px 7px 12px;font-size:12.5px;font-weight:500}
+.mini li i{width:9px;height:9px;border-radius:50%}
+.mini li button{border:0;border-radius:999px;background:var(--ink);color:#fff;font-size:11px;font-weight:600;padding:4px 10px;font-variant-numeric:tabular-nums}
+.mini li button:hover{background:var(--red)}
+.mark-wrap{align-self:end;position:relative;width:100%}
+.wordmark{display:inline-block;white-space:nowrap;font-family:var(--f-display);line-height:.95;font-size:24vw;letter-spacing:-.06em;margin:0 0 -.16em}
+.wordmark i{font-weight:200;color:var(--ink);letter-spacing:-.05em;padding-right:.04em}
+.wordmark b{font-weight:900;color:var(--red)}
+.hanchor{position:absolute;touch-action:pan-y;cursor:grab}
+.hanchor.a{left:16%;width:13%;top:-58%;height:112%}
+.hanchor.b{left:43%;width:13%;top:-74%;height:118%}
+.hanchor.c{left:70%;width:20%;top:-40%;height:62%}
+@media (max-width:700px){
+  .hanchor.a{top:-120%;height:170%} .hanchor.b{top:-140%;height:180%} .hanchor.c{top:-80%;height:95%}
+}
+.hero-foot{display:flex;justify-content:space-between;gap:16px;color:var(--muted)}
+
+/* ---------- chapters ---------- */
+.chapter{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:48px;padding-block:110px 70px}
+.chapter.flip .ch-text{order:2}
+.chapter.flip .post{order:1}
+.ch-text{max-width:520px;min-width:0}
+.ch-text .eyebrow{display:flex;gap:14px;color:var(--deep)}
+.ch-title{font-family:var(--f-display);font-weight:800;font-size:clamp(50px,7.6vw,118px);line-height:.92;letter-spacing:-.06em;margin:14px 0 18px;color:var(--deep)}
+.ch-title em{font-weight:200;font-style:italic;letter-spacing:-.04em}
+.ch-text p.lead{font-size:clamp(15px,1.3vw,18px);max-width:36ch;margin:0 0 6px}
+.ch-text p.prod{font-size:12.5px;color:var(--muted);margin:0 0 20px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 26px;padding:0;list-style:none}
+.chips li{border:1px solid color-mix(in srgb, var(--deep) 30%, transparent);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:500;background:rgba(255,255,255,.45)}
+.addbtn{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;max-width:420px;border:0;border-radius:999px;background:var(--ink);color:#fff;padding:8px 8px 8px 24px;font-size:14px;font-weight:600;letter-spacing:-.01em;transition:background .2s, transform .2s}
+.addbtn:hover{background:var(--deep)}
+.addbtn:active{transform:scale(.98)}
+.addbtn .price{background:#fff;color:var(--ink);border-radius:999px;padding:6px 12px;font-size:12.5px;font-variant-numeric:tabular-nums}
+.addbtn.added .label::after{content:" ✓"}
+
+.post{justify-self:center;width:min(340px,82vw);background:var(--card);border-radius:18px;box-shadow:0 30px 60px -30px rgba(43,40,41,.45), 0 0 0 1px rgba(43,40,41,.06);overflow:hidden;margin:0}
+.post header{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.post .av{width:30px;height:30px;border-radius:50%;background:var(--ink);display:grid;place-items:center;font-family:var(--f-display);font-style:italic;font-weight:300;color:#fff;font-size:15px;box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--red)}
+.post header b{display:block;font-size:12.5px}
+.post header small{display:block;font-size:11px;color:var(--muted)}
+.post header .dots{margin-left:auto;letter-spacing:2px;color:var(--muted)}
+.post-img{position:relative;aspect-ratio:1/1;max-width:100%;background:radial-gradient(120% 90% at 50% 30%, #fff, var(--tint));touch-action:pan-y;cursor:grab;overflow:visible}
+.post-img .pill{position:absolute;left:14px;bottom:14px;background:rgba(43,40,41,.88);color:#fff;font-size:11px;padding:6px 10px;border-radius:8px;line-height:1.3}
+.post-img .pill b{display:block;font-size:11.5px}
+.post-img .drag{position:absolute;right:12px;top:12px;font-size:9.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--deep);opacity:.6}
+.heart{position:absolute;left:50%;top:50%;width:90px;height:90px;margin:-45px 0 0 -45px;opacity:0;transform:scale(.3);pointer-events:none}
+.heart.pop{animation:pop .9s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{0%{opacity:0;transform:scale(.3)}25%{opacity:.95;transform:scale(1.1)}60%{opacity:.95;transform:scale(1)}100%{opacity:0;transform:scale(1.1) translateY(-20px)}}
+.post footer{padding:10px 14px 14px;font-size:12px}
+.post .icons{display:flex;gap:14px;align-items:center;margin-bottom:8px}
+.post .icons button{background:none;border:0;padding:0;display:grid;line-height:0}
+.post .icons svg{width:21px;height:21px;fill:none;stroke:var(--ink);stroke-width:1.8}
+.post .icons .liked svg{fill:var(--red);stroke:var(--red)}
+.post .icons .save{margin-left:auto}
+.post footer p{margin:0;line-height:1.45}
+
+#ceramide{--deep:var(--cer-deep);--tint:#D3E3F1}
+#retinol{--deep:var(--ret-deep);--tint:#E3D2EA}
+#turmeric{--deep:var(--tur-deep);--tint:#F6D79A}
+
+/* turmeric: giant word with post card on top of it */
+.chapter.wide{grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-template-rows:1fr auto;align-items:end;gap:20px 40px;padding-block:90px 40px}
+.bigword-wrap{grid-column:1/-1;grid-row:1;align-self:center;width:100%;min-width:0;text-align:center;overflow:visible}
+.bigword{display:inline-block;white-space:nowrap;font-family:var(--f-display);font-weight:900;font-size:16vw;line-height:.85;letter-spacing:-.07em;color:var(--tur-deep);margin:0}
+.chapter.wide .post{grid-column:2;grid-row:1;align-self:center;width:min(300px,72vw)}
+.chapter.wide .ch-text{grid-column:1;grid-row:2;align-self:end}
+.chapter.wide .ch-buy{grid-column:3;grid-row:2;justify-self:end;align-self:end;display:flex;flex-direction:column;align-items:flex-end;gap:16px;width:100%;max-width:420px}
+.chapter.wide .ch-buy .chips{justify-content:flex-end;margin:0}
+.chapter.wide .ch-title{font-size:13px;font-family:var(--f-body);font-style:normal;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 10px}
+
+@media (max-width:860px){
+  .chapter,.chapter.wide{grid-template-columns:minmax(0,1fr);grid-template-rows:none;gap:28px;padding-block:96px 56px}
+  .chapter.flip .ch-text,.chapter.flip .post{order:initial}
+  .chapter.wide .bigword-wrap,.chapter.wide .post,.chapter.wide .ch-text,.chapter.wide .ch-buy{grid-column:1;grid-row:auto}
+  .chapter.wide .ch-buy{justify-self:start;align-items:flex-start}
+  .chapter.wide .ch-buy .chips{justify-content:flex-start}
+  .chapter.wide .post{justify-self:center;margin-top:-12vw}
+}
+
+/* ---------- bag finale ---------- */
+.bag{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;gap:40px;padding-block:96px 60px}
+.bag-left{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:16px;max-width:520px}
+.receipt{position:absolute;left:0;top:calc(-96px - 100%);width:100%;background:#fff;font-family:var(--f-mono);font-size:11px;font-weight:400;line-height:1.6;padding:16px 16px 22px;box-shadow:0 20px 40px -24px rgba(43,40,41,.5);
+  -webkit-mask:linear-gradient(#000 0 0) top/100% calc(100% - 8px) no-repeat, radial-gradient(circle 5px at 7px 100%, transparent 98%, #000) bottom/14px 8px repeat-x;
+  mask:linear-gradient(#000 0 0) top/100% calc(100% - 8px) no-repeat, radial-gradient(circle 5px at 7px 100%, transparent 98%, #000) bottom/14px 8px repeat-x}
+.receipt-slot{position:relative;width:min(300px,100%);min-height:220px}
+.receipt{position:relative;top:auto}
+.receipt .rh{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:8px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.14em;font-weight:600;font-size:10px}
+.receipt .row{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}
+.receipt .row span:first-child{min-width:0}
+.receipt .tot{border-top:1px dashed var(--line);margin-top:8px;padding-top:8px;font-weight:700;font-size:13px}
+.receipt .note{color:var(--muted);margin-top:8px;font-size:10px}
+.receipt .barcode{height:28px;margin-top:10px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 3px,var(--ink) 3px 4px,transparent 4px 7px,var(--ink) 7px 10px,transparent 10px 12px)}
+.bag h2{font-family:var(--f-display);font-weight:800;font-size:clamp(52px,7.5vw,116px);line-height:.92;letter-spacing:-.06em;margin:0}
+.bag h2 em{color:var(--red);font-weight:200;font-style:italic;letter-spacing:-.05em}
+.bag p{margin:0;max-width:36ch;color:var(--muted)}
+.bag .actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;width:100%}
+.ghost{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--ink);border-radius:999px;padding:10px 18px;font-size:13px;font-weight:600;text-decoration:none;background:transparent}
+.ghost:hover{background:var(--ink);color:#fff}
+.bag-anchor{justify-self:center;width:min(380px,70vw);aspect-ratio:3/4;max-width:100%;touch-action:pan-y;cursor:grab}
+@media (max-width:860px){ .bag{grid-template-columns:minmax(0,1fr)} .bag-anchor{order:-1;width:min(260px,60vw)} }
+
+/* ---------- footer ---------- */
+.foot{position:relative;z-index:3;background:var(--ink);color:#F1ECE8;padding-block:64px 32px;padding-left:var(--gut-l);padding-right:var(--gut-r)}
+.marquee{overflow:hidden;border-block:1px solid rgba(255,255,255,.14);padding-block:18px;margin-bottom:48px}
+.marquee .track{display:flex;gap:48px;width:max-content;animation:mq 38s linear infinite;font-family:var(--f-display);font-weight:800;letter-spacing:-.04em;font-size:clamp(22px,3vw,36px);white-space:nowrap}
+.marquee .track span:nth-child(even){font-weight:200;font-style:italic}
+.marquee .track span:nth-child(3n+2){color:var(--red)}
+@keyframes mq{to{transform:translateX(-50%)}}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr;gap:32px}
+.foot h3{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;font-weight:600;color:rgba(241,236,232,.55);margin:0 0 14px}
+.foot ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.foot a{text-decoration:none}
+.foot a:hover{color:#fff;text-decoration:underline;text-underline-offset:3px}
+.foot .big{font-family:var(--f-display);font-size:clamp(26px,3vw,38px);line-height:1.05;margin:0 0 14px;letter-spacing:-.04em;font-weight:300}
+.foot .big i{font-weight:200}
+.foot .big b{color:var(--red);font-weight:800}
+.foot .copy{display:inline-flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:8px 8px 8px 14px;font-family:var(--f-mono);font-size:13px;user-select:all}
+.foot .copy button{border:0;border-radius:999px;background:#fff;color:var(--ink);font-family:var(--f-body);font-size:11px;font-weight:600;padding:5px 10px;user-select:none}
+.foot-bottom{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:56px;padding-top:20px;border-top:1px solid rgba(255,255,255,.14);font-size:11.5px;color:rgba(241,236,232,.55)}
+@media (max-width:860px){ .foot-grid{grid-template-columns:1fr 1fr} .foot-grid > :first-child{grid-column:1/-1} }
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 22px);transform:translate(-50%,calc(100% + 60px));visibility:hidden;z-index:12;background:var(--ink);color:#fff;border-radius:999px;padding:10px 18px;font-size:13px;font-weight:500;transition:transform .45s cubic-bezier(.2,1.2,.4,1),visibility .45s;white-space:nowrap;max-width:calc(100vw - 32px);overflow:hidden;text-overflow:ellipsis}
+.toast.show{transform:translate(-50%,0);visibility:visible}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .marquee .track{animation:none}
+  #intro{transition:opacity .3s}
+  #intro.gone{transform:none;opacity:0}
+  .receipt{transition:none}
+}
+
+/* ================= MOTION LAYER ================= */
+#glow{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(560px circle at var(--gx,50%) var(--gy,40%), rgba(255,255,255,.65), transparent 70%)}
+#progress{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;height:2px;z-index:11;background:var(--red);transform-origin:left;transform:scaleX(0)}
+.nav{transition:transform .55s cubic-bezier(.2,.8,.2,1)}
+.nav.hide{transform:translateY(-130%)}
+.nav-links a{position:relative}
+.nav-links a::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:1.5px;background:var(--red);transform:scaleX(0);transform-origin:right;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.nav-links a.active{opacity:1}
+.nav-links a.active::after,.nav-links a:hover::after{transform:scaleX(1);transform-origin:left}
+.logo .nox{display:inline-block;transition:transform .5s cubic-bezier(.3,1.6,.5,1)}
+.logo:hover .nox{transform:translateY(-3px) rotate(-4deg)}
+
+/* split text */
+.wd{display:inline-block;white-space:nowrap}
+.motion [data-split] .ch{display:inline-block;opacity:0;transform:translateY(.6em) rotate(7deg);filter:blur(8px);transition:opacity .3s, transform .4s, filter .3s;will-change:transform}
+.motion .in [data-split] .ch{opacity:1;transform:none;filter:blur(0);transition:opacity .7s, transform 1s cubic-bezier(.16,1,.3,1), filter .7s;transition-delay:calc(var(--i)*var(--step,32ms) + var(--d,0ms))}
+.motion [data-split="words"] .ch{transform:translateY(.8em)}
+.motion [data-split="words"]{--step:70ms}
+
+/* block reveals (individual transform props so they stack with JS transforms) */
+.motion [data-rv]{opacity:0;translate:0 30px;transition:opacity .35s, translate .45s, scale .45s, rotate .45s}
+.motion .in [data-rv]{opacity:1;translate:0 0;scale:1;rotate:0deg;transition:opacity .8s, translate 1.1s cubic-bezier(.16,1,.3,1), scale 1.1s cubic-bezier(.16,1,.3,1), rotate 1.1s cubic-bezier(.16,1,.3,1);transition-delay:var(--d,0ms)}
+.motion .chips li[data-rv]{scale:.6;translate:0 12px}
+.motion .in .chips li[data-rv]{scale:1;translate:0 0}
+.motion [data-rv="card"]{translate:0 90px;scale:.88;rotate:-4deg}
+.motion .flip [data-rv="card"]{rotate:4deg}
+.post{will-change:transform}
+
+/* idle loops */
+@keyframes bob{50%{transform:translateY(-5px)}}
+@keyframes nudge{50%{translate:0 6px}}
+@keyframes pulse{50%{opacity:.35}}
+.hero .mini li{animation:bob 5s ease-in-out infinite;animation-delay:calc(var(--k,0)*-1.4s)}
+.hero-foot span:last-child{display:inline-block;animation:nudge 1.6s ease-in-out infinite}
+.intro-hint span:first-child{animation:pulse 2.2s ease-in-out infinite}
+.post .av{animation:ring 3s linear infinite}
+@keyframes ring{0%,100%{box-shadow:0 0 0 2px #fff,0 0 0 3.5px var(--red)}50%{box-shadow:0 0 0 2px #fff,0 0 0 5px rgba(224,22,30,.35)}}
+
+/* buttons: magnetic + shine */
+.addbtn,.ghost{position:relative;overflow:hidden;transition:background .2s, color .2s, transform .45s cubic-bezier(.2,.9,.3,1.2)}
+.addbtn::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.28) 50%,transparent 70%);transform:translateX(-120%);pointer-events:none}
+.addbtn:hover::before{transform:translateX(120%);transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.addbtn .price{transition:transform .4s cubic-bezier(.3,1.6,.5,1)}
+.addbtn:hover .price{transform:scale(1.08) rotate(-3deg)}
+.chips li{transition:background .25s, transform .3s cubic-bezier(.3,1.6,.5,1)}
+.chips li:hover{background:#fff;transform:translateY(-3px)}
+
+/* receipt prints line by line */
+@keyframes printrow{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.motion .bag.on .receipt > *{animation:printrow .45s both;animation-delay:calc(var(--r,0)*110ms + .55s)}
+.motion .receipt{transform:translateY(-60px);opacity:.0;transition:transform 1.1s cubic-bezier(.2,.8,.2,1), opacity .5s}
+.motion .bag.on .receipt{transform:none;opacity:1}
+
+/* cursor */
+.cursor{position:fixed;left:0;top:0;width:34px;height:34px;margin:-17px 0 0 -17px;border:1.5px solid var(--ink);border-radius:50%;pointer-events:none;z-index:30;display:grid;place-items:center;font-size:9px;font-weight:600;letter-spacing:.16em;color:#fff;transition:width .35s cubic-bezier(.2,.8,.2,1), height .35s cubic-bezier(.2,.8,.2,1), margin .35s cubic-bezier(.2,.8,.2,1), background .3s, border-color .3s}
+.cursor span{opacity:0;transition:opacity .2s}
+.cursor.drag{width:78px;height:78px;margin:-39px 0 0 -39px;background:var(--ink)}
+.cursor.drag span{opacity:1}
+.cursor.link{width:58px;height:58px;margin:-29px 0 0 -29px;border-color:var(--red);background:rgba(224,22,30,.08)}
+.cursor-dot{position:fixed;left:0;top:0;width:5px;height:5px;margin:-2.5px 0 0 -2.5px;border-radius:50%;background:var(--red);pointer-events:none;z-index:31}
+
+@media (prefers-reduced-motion:reduce){
+  .hero .mini li,.hero-foot span:last-child,.intro-hint span:first-child,.post .av{animation:none}
+}
+</style>
+</head>
+<body>
+
+<div id="glow" aria-hidden="true"></div>
+<div id="progress" aria-hidden="true"></div>
+<canvas id="stage" aria-hidden="true"></canvas>
+
+<!-- ============ INTRO: pull the swing tag ============ -->
+<div id="intro" aria-label="Welcome to Chinox Cosmetics">
+  <div class="intro-top">
+    <span class="logo"><span class="chi">chi</span><span class="nox">NOX</span></span>
+    <span class="label">Skincare · Collection Nº1</span>
+  </div>
+  <div class="string" id="string"></div>
+  <div class="tagwrap" id="tagwrap">
+    <div class="tag" id="tag" role="button" tabindex="0" aria-label="Pull the tag down to enter the site">
+      <div class="tag-face f">
+        <span class="tl"><i>chi</i><b>NOX</b></span>
+        <span class="tc">cosmetics</span>
+        <span class="rule"></span>
+        <span class="tm">Collection Nº1<br>Three heroes<br>UK · US · Korea</span>
+        <span class="bar"></span>
+      </div>
+      <div class="tag-face b">
+        <small>Pull to open</small>
+        <p>Glow <em>all year</em> round.</p>
+        <small>Authentic skincare</small>
+      </div>
+    </div>
+  </div>
+  <div class="intro-hint"><span>Hold &amp; pull the tag down</span><span class="track"><i id="pullbar"></i></span></div>
+  <button class="skip" id="skip" type="button">Skip intro</button>
+</div>
+
+<!-- ============ NAV ============ -->
+<nav class="nav" aria-label="Main">
+  <a class="logo" href="#hero" aria-label="Chinox Cosmetics home"><span class="chi">chi</span><span class="nox">NOX</span><small>cosmetics</small></a>
+  <div class="nav-links">
+    <a href="#ceramide">Ceramide</a>
+    <a href="#retinol">Retinol</a>
+    <a href="#turmeric">Turmeric</a>
+  </div>
+  <a class="bagbtn" href="#bag">Bag <span class="count" id="bagcount">0</span></a>
+</nav>
+
+<main>
+  <!-- ============ HERO ============ -->
+  <section class="sec hero" id="hero" data-scene="hero">
+    <div class="hero-top front">
+      <div>
+        <h1>Healthier-looking skin, <em>all year round.</em></h1>
+        <p class="sub">Authentic skincare sourced from the UK, US and Korea. Three favourites, picked for barrier, renewal and body glow.</p>
+      </div>
+      <ul class="mini" aria-label="Featured products">
+        <li><i style="background:var(--cer-acc)"></i>Ceramide Serum<button type="button" data-add="cer">₦4,500</button></li>
+        <li><i style="background:#9a4d12"></i>Retinol Serum<button type="button" data-add="ret">₦4,500</button></li>
+        <li><i style="background:var(--tur-acc)"></i>Turmeric Salt Scrub<button type="button" data-add="tur">₦4,500</button></li>
+      </ul>
+    </div>
+    <div class="mark-wrap back">
+      <p class="wordmark fit" data-maxvh="0.4" aria-label="Chinox"><i>chi</i><b>NOX</b></p>
+      <div class="hanchor a" data-anchor="cer" data-rz="0.42" data-fit="1"></div>
+      <div class="hanchor b" data-anchor="ret" data-rz="-0.06" data-fit="1"></div>
+      <div class="hanchor c" data-anchor="tur" data-rz="-0.28" data-rx="0.35" data-fit="1"></div>
+    </div>
+    <div class="hero-foot front eyebrow">
+      <span>Collection Nº1 — three heroes</span>
+      <span>Scroll ↓</span>
+    </div>
+  </section>
+
+  <!-- ============ 01 CERAMIDE ============ -->
+  <section class="sec chapter" id="ceramide" data-scene="cer">
+    <div class="ch-text front">
+      <div class="eyebrow"><span>01 / 03</span><span>Barrier</span></div>
+      <h2 class="ch-title">Ceramide<em>.</em></h2>
+      <p class="lead">A light serum that helps restore the skin barrier and keep moisture in, morning and night.</p>
+      <p class="prod">Face Facts Nourish + Restore Ceramide Serum · 30 ml</p>
+      <ul class="chips"><li>Ceramides</li><li>Barrier repair</li><li>AM + PM</li></ul>
+      <button class="addbtn" type="button" data-add="cer"><span class="label">Add to bag</span><span class="price">₦4,500</span></button>
+    </div>
+    <figure class="post back" data-post>
+      <header><span class="av">c</span><div><b>chinox.cosmetics</b><small>In stock · ₦4,500</small></div><span class="dots">•••</span></header>
+      <div class="post-img" data-anchor="cer" data-fit="1.08" data-rz="-0.32">
+        <span class="drag">Drag to spin</span>
+        <svg class="heart" viewBox="0 0 24 24"><path fill="#fff" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>
+        <span class="pill"><b>Ceramide Serum</b>₦4,500 · Shop now ›</span>
+      </div>
+      <footer>
+        <div class="icons"><button type="button" class="like" aria-label="Like"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg></button><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 3 11 14M22 3l-7 18-4-7-7-4z"/></svg><svg class="save" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg></div>
+        <p><b>chinox.cosmetics</b> Thirsty skin, meet your barrier fix. Ceramide serum, ₦4,500.</p>
+      </footer>
+    </figure>
+  </section>
+
+  <!-- ============ 02 RETINOL ============ -->
+  <section class="sec chapter flip" id="retinol" data-scene="ret">
+    <div class="ch-text front">
+      <div class="eyebrow"><span>02 / 03</span><span>Renewal</span></div>
+      <h2 class="ch-title"><em>Re</em>tinol</h2>
+      <p class="lead">An evening serum for smoother-looking texture and a more even glow. Start slow, and wear sunscreen by day.</p>
+      <p class="prod">Face Facts Renew &amp; Radiance Retinol Facial Serum · 30 ml</p>
+      <ul class="chips"><li>Retinol</li><li>Night use</li><li>Texture + tone</li></ul>
+      <button class="addbtn" type="button" data-add="ret"><span class="label">Add to bag</span><span class="price">₦4,500</span></button>
+    </div>
+    <figure class="post back" data-post>
+      <header><span class="av">c</span><div><b>chinox.cosmetics</b><small>In stock · ₦4,500</small></div><span class="dots">•••</span></header>
+      <div class="post-img" data-anchor="ret" data-fit="1.08" data-rz="0.36">
+        <span class="drag">Drag to spin</span>
+        <svg class="heart" viewBox="0 0 24 24"><path fill="#fff" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>
+        <span class="pill"><b>Retinol Serum</b>₦4,500 · Shop now ›</span>
+      </div>
+      <footer>
+        <div class="icons"><button type="button" class="like" aria-label="Like"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg></button><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 3 11 14M22 3l-7 18-4-7-7-4z"/></svg><svg class="save" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg></div>
+        <p><b>chinox.cosmetics</b> Your night shift, in a dropper. Retinol serum, ₦4,500.</p>
+      </footer>
+    </figure>
+  </section>
+
+  <!-- ============ 03 TURMERIC ============ -->
+  <section class="sec chapter wide" id="turmeric" data-scene="tur">
+    <div class="bigword-wrap back"><p class="bigword fit" aria-hidden="true">TURMER<i style="font-weight:200">IC</i></p></div>
+    <figure class="post back" data-post>
+      <header><span class="av">c</span><div><b>chinox.cosmetics</b><small>In stock · ₦4,500</small></div><span class="dots">•••</span></header>
+      <div class="post-img" data-anchor="tur" data-fit="0.62" data-rz="-0.22" data-rx="0.4">
+        <span class="drag">Drag to spin</span>
+        <svg class="heart" viewBox="0 0 24 24"><path fill="#fff" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg>
+        <span class="pill"><b>Turmeric Salt Scrub</b>₦4,500 · Shop now ›</span>
+      </div>
+      <footer>
+        <div class="icons"><button type="button" class="like" aria-label="Like"><svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4.7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/></svg></button><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 3 11 14M22 3l-7 18-4-7-7-4z"/></svg><svg class="save" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-6-4-6 4z"/></svg></div>
+        <p><b>chinox.cosmetics</b> Sunday reset: salt, turmeric, soft skin. 450 ml, ₦4,500.</p>
+      </footer>
+    </figure>
+    <div class="ch-text front">
+      <div class="eyebrow"><span>03 / 03</span><span>Body glow</span></div>
+      <h2 class="ch-title">Turmeric salt scrub</h2>
+      <p class="lead">A bath scrub that buffs away dull, rough patches and leaves body skin soft and bright.</p>
+      <p class="prod" style="margin:0">Kuu Spa Turmeric Salt Scrub Bath · 450 ml</p>
+    </div>
+    <div class="ch-buy front">
+      <ul class="chips"><li>Turmeric</li><li>Sea salt</li><li>Body</li></ul>
+      <button class="addbtn" type="button" data-add="tur"><span class="label">Add to bag</span><span class="price">₦4,500</span></button>
+    </div>
+  </section>
+
+  <!-- ============ BAG FINALE ============ -->
+  <section class="sec bag" id="bag" data-scene="bag">
+    <div class="bag-left front">
+      <div class="receipt-slot"><div class="receipt" id="receipt" aria-live="polite"></div></div>
+      <h2>It’s in<br>the <em>bag.</em></h2>
+      <p>Ceramide, Retinol and Turmeric together for ₦13,500. Pay on delivery, or by Visa, Mastercard or PayPal.</p>
+      <div class="actions">
+        <button class="addbtn" type="button" id="trio" style="max-width:300px"><span class="label">Shop the trio</span><span class="price">₦13,500</span></button>
+        <a class="ghost" href="https://chinoxcosmetics.com" target="_blank" rel="noopener">Checkout on chinoxcosmetics.com ↗</a>
+      </div>
+    </div>
+    <div class="bag-anchor back" data-anchor="bag" data-fit="0.95" data-rz="0.08"></div>
+  </section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer class="foot" data-scene="foot">
+  <div class="marquee" aria-label="Brands we stock">
+    <div class="track">
+      <span>CeraVe</span><span>COSRX</span><span>Neutrogena</span><span>Simple</span><span>Kojie San</span><span>Face Facts</span><span>Skin Aqua</span><span>PanOxyl</span><span>Vaseline</span><span>Tiam</span><span>Timeless</span><span>Medix</span>
+      <span aria-hidden="true">CeraVe</span><span aria-hidden="true">COSRX</span><span aria-hidden="true">Neutrogena</span><span aria-hidden="true">Simple</span><span aria-hidden="true">Kojie San</span><span aria-hidden="true">Face Facts</span><span aria-hidden="true">Skin Aqua</span><span aria-hidden="true">PanOxyl</span><span aria-hidden="true">Vaseline</span><span aria-hidden="true">Tiam</span><span aria-hidden="true">Timeless</span><span aria-hidden="true">Medix</span>
+    </div>
+  </div>
+  <div class="foot-grid">
+    <div>
+      <p class="big"><i>chi</i><b>NOX</b> cosmetics</p>
+      <p style="margin:0 0 18px;max-width:34ch;color:rgba(241,236,232,.75)">Authentic skincare from the UK, US and Korea. Not sure what your skin needs? Book a free consultation.</p>
+      <span class="copy"><span id="phone">+234 814 178 4938</span><button type="button" id="copyphone">Copy</button></span>
+    </div>
+    <div>
+      <h3>Shop</h3>
+      <ul><li><a href="https://chinoxcosmetics.com" target="_blank" rel="noopener">Face</a></li><li><a href="https://chinoxcosmetics.com" target="_blank" rel="noopener">Body &amp; Bath</a></li><li><a href="https://chinoxcosmetics.com" target="_blank" rel="noopener">Serums</a></li><li><a href="https://chinoxcosmetics.com" target="_blank" rel="noopener">Sunscreen</a></li></ul>
+    </div>
+    <div>
+      <h3>Help</h3>
+      <ul><li><a href="https://chinoxcosmetics.com/contact/" target="_blank" rel="noopener">Free consultation</a></li><li><a href="https://chinoxcosmetics.com" target="_blank" rel="noopener">Wholesale</a></li><li><a href="https://chinoxcosmetics.com/contact/" target="_blank" rel="noopener">Contact</a></li></ul>
+    </div>
+    <div>
+      <h3>Follow</h3>
+      <ul><li><a href="https://www.instagram.com/chinox.cosmetics" target="_blank" rel="noopener">Instagram ↗</a></li><li><a href="https://www.tiktok.com/@chinox.cosmetics" target="_blank" rel="noopener">TikTok ↗</a></li><li><a href="https://wa.me/2348141784938" target="_blank" rel="noopener">WhatsApp ↗</a></li></ul>
+    </div>
+  </div>
+  <div class="foot-bottom"><span>© 2026 Chinox Cosmetics</span><span>Concept redesign · prices from chinoxcosmetics.com</span></div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ======================= CART ======================= */
+const PRODUCTS = {
+  cer:{name:'Ceramide Serum 30ml', price:4500},
+  ret:{name:'Retinol Serum 30ml', price:4500},
+  tur:{name:'Turmeric Salt Scrub 450ml', price:4500},
+};
+const naira = n => '₦' + n.toLocaleString('en-NG');
+const cart = {};
+const toastEl = $('#toast'); let toastT;
+function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(()=>toastEl.classList.remove('show'), 2200); }
+function renderCart(){
+  const ids = Object.keys(cart).filter(k=>cart[k]>0);
+  const n = ids.reduce((s,k)=>s+cart[k],0);
+  const c = $('#bagcount'); c.textContent = n; c.classList.add('bump'); setTimeout(()=>c.classList.remove('bump'), 300);
+  const show = ids.length ? ids : ['cer','ret','tur'];
+  const qty = k => ids.length ? cart[k] : 1;
+  const total = show.reduce((s,k)=>s+PRODUCTS[k].price*qty(k),0);
+  const date = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  $('#receipt').innerHTML = `
+    <div class="rh"><span>chinox cosmetics</span><span>${ids.length ? 'Your bag' : 'The trio'}</span></div>
+    <div class="row" style="color:var(--muted)"><span>${date}</span><span>${show.reduce((s,k)=>s+qty(k),0)} items</span></div>
+    ${show.map(k=>`<div class="row"><span>${qty(k)} × ${PRODUCTS[k].name}</span><span>${naira(PRODUCTS[k].price*qty(k))}</span></div>`).join('')}
+    <div class="row tot"><span>Total</span><span>${naira(total)}</span></div>
+    <div class="note">Pay on delivery · Visa · Mastercard · PayPal</div>
+    <div class="barcode"></div>`;
+  [...$('#receipt').children].forEach((c,i)=>c.style.setProperty('--r', i));
+}
+function add(id, quiet){
+  cart[id] = (cart[id]||0) + 1;
+  renderCart();
+  $$(`.addbtn[data-add="${id}"]`).forEach(b=>{ b.classList.add('added'); setTimeout(()=>b.classList.remove('added'),1400); });
+  if(!quiet) toast(`Added ${PRODUCTS[id].name} to your bag`);
+  if(window.__spin) window.__spin(id);
+}
+$$('[data-add]').forEach(b=>b.addEventListener('click',()=>add(b.dataset.add)));
+$('#trio').addEventListener('click',()=>{ ['cer','ret','tur'].forEach(k=>add(k,true)); toast('Added the trio to your bag · ₦13,500'); });
+renderCart();
+
+$('#copyphone').addEventListener('click', async e=>{
+  const btn = e.currentTarget;
+  try { await navigator.clipboard.writeText('+2348141784938'); btn.textContent='Copied'; }
+  catch(_) { const r=document.createRange(); r.selectNodeContents($('#phone')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent='Selected'; }
+  setTimeout(()=>btn.textContent='Copy',1600);
+});
+
+/* post interactions: like + double-tap heart */
+$$('[data-post]').forEach(p=>{
+  const like = $('.like',p), heart = $('.heart',p), img = $('.post-img',p);
+  like.addEventListener('click',()=>like.classList.toggle('liked'));
+  img.addEventListener('dblclick',()=>{ like.classList.add('liked'); heart.classList.remove('pop'); void heart.offsetWidth; heart.classList.add('pop'); });
+});
+
+/* ======================= MOTION ======================= */
+const docEl = document.documentElement;
+if(!reduce) docEl.classList.add('motion');
+function split(el, mode){
+  if(!el.getAttribute('aria-label')) el.setAttribute('aria-label', el.textContent.replace(/\s+/g,' ').trim());
+  el.dataset.split = mode || 'chars';
+  let i = 0;
+  const walk = node => {
+    [...node.childNodes].forEach(n=>{
+      if(n.nodeType === 3){
+        const frag = document.createDocumentFragment();
+        n.textContent.split(/(\s+)/).forEach(part=>{
+          if(!part) return;
+          if(/^\s+$/.test(part)){ frag.appendChild(document.createTextNode(' ')); return; }
+          const w = document.createElement('span'); w.className = 'wd'; w.setAttribute('aria-hidden','true');
+          if(mode === 'words'){ w.classList.add('ch'); w.style.setProperty('--i', i++); w.textContent = part; }
+          else [...part].forEach(c=>{ const sp = document.createElement('span'); sp.className='ch'; sp.style.setProperty('--i', i++); sp.textContent = c; w.appendChild(sp); });
+          frag.appendChild(w);
+        });
+        n.replaceWith(frag);
+      } else if(n.nodeType === 1 && n.tagName !== 'BR') walk(n);
+    });
+  };
+  walk(el);
+}
+split($('.hero h1'), 'words');
+split($('.wordmark')); $('.wordmark').style.setProperty('--d','150ms');
+$$('.chapter .ch-title').forEach(el=>split(el));
+split($('.bigword'));
+split($('.bag h2'));
+split($('.foot .big'), 'words');
+const rv = (els, base=0, step=80, kind='') => els.forEach((el,i)=>{ el.setAttribute('data-rv', kind); el.style.setProperty('--d', (base + i*step) + 'ms'); });
+rv($$('.hero .sub'), 350); rv($$('.hero .mini li'), 450, 110); rv($$('.hero-foot'), 800);
+$$('.hero .mini li').forEach((li,i)=>li.style.setProperty('--k', i));
+$$('.chapter').forEach(sec=>{
+  rv($$('.post', sec), 120, 0, 'card');
+  rv($$('.eyebrow, p.lead, p.prod, .chips li, .addbtn', sec), 280, 70);
+});
+rv($$('.bag-left > p, .bag .actions > *'), 450, 110);
+rv($$('.foot-grid > div'), 200, 110);
+
+/* sections enter / leave a middle band -> .in toggles, so animations replay each visit */
+const motionSecs = $$('[data-scene]');
+const inBand = new Set();
+function applyIn(){
+  motionSecs.forEach(s=>{
+    const ok = inBand.has(s) && !(s.id==='hero' && docEl.classList.contains('locked'));
+    s.classList.toggle('in', ok);
+  });
+  $$('.nav-links a').forEach(a=>{ const t = $(a.getAttribute('href')); a.classList.toggle('active', !!t && t.classList.contains('in')); });
+}
+window.__motionRefresh = applyIn;
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=> e.isIntersecting ? inBand.add(e.target) : inBand.delete(e.target));
+  applyIn();
+}, {rootMargin:'-33% 0px -33% 0px'});
+motionSecs.forEach(s=>io.observe(s));
+
+/* cursor */
+const fine = matchMedia('(pointer:fine)').matches && !reduce;
+let cur, dot;
+if(fine){
+  cur = document.createElement('div'); cur.className='cursor'; cur.innerHTML='<span>DRAG</span>';
+  dot = document.createElement('div'); dot.className='cursor-dot';
+  document.body.append(cur, dot);
+  addEventListener('pointerover', e=>{
+    const tgt = e.target;
+    const drag = tgt.closest && tgt.closest('[data-anchor], .tag');
+    const link = tgt.closest && tgt.closest('a, button');
+    cur.classList.toggle('drag', !!drag); cur.classList.toggle('link', !drag && !!link);
+    $('span',cur).textContent = tgt.closest && tgt.closest('.tag') ? 'PULL' : 'DRAG';
+  });
+}
+/* magnetic buttons */
+if(fine) $$('.addbtn, .ghost, .bagbtn').forEach(b=>{
+  b.addEventListener('pointermove', e=>{ const r=b.getBoundingClientRect(); b.style.transform=`translate(${(e.clientX-r.left-r.width/2)*.12}px, ${(e.clientY-r.top-r.height/2)*.3}px)`; });
+  b.addEventListener('pointerleave', ()=>{ b.style.transform=''; });
+});
+
+/* per-frame motion: progress, nav, parallax, card tilt, cursor, glow */
+const M = {x:innerWidth/2, y:innerHeight/2, cx:innerWidth/2, cy:innerHeight/2, dx:innerWidth/2, dy:innerHeight/2, gx:innerWidth/2, gy:innerHeight*.4};
+addEventListener('pointermove', e=>{ M.x=e.clientX; M.y=e.clientY; });
+const navEl = $('.nav'), prog = $('#progress'), glow = $('#glow');
+const posts = $$('.post'), wm = $('.wordmark'), bw = $('.bigword'), titles = $$('.chapter .ch-title'), heroSec = $('#hero');
+let lastY = scrollY;
+(function motionLoop(now){
+  const t = now/1000;
+  const y = scrollY, max = Math.max(1, docEl.scrollHeight - innerHeight);
+  prog.style.transform = `scaleX(${y/max})`;
+  if(y > lastY + 4 && y > 260) navEl.classList.add('hide');
+  else if(y < lastY - 4 || y < 120) navEl.classList.remove('hide');
+  lastY = y;
+  if(!reduce){
+    M.cx += (M.x-M.cx)*.18; M.cy += (M.y-M.cy)*.18;
+    M.gx += (M.x-M.gx)*.06; M.gy += (M.y-M.gy)*.06;
+    if(cur){ cur.style.transform=`translate3d(${M.cx}px,${M.cy}px,0)`; dot.style.transform=`translate3d(${M.x}px,${M.y}px,0)`; }
+    glow.style.setProperty('--gx', M.gx+'px'); glow.style.setProperty('--gy', M.gy+'px');
+    const mx = (M.cx/innerWidth)*2-1, my = (M.cy/innerHeight)*2-1;
+    const hr = heroSec.getBoundingClientRect();
+    const hp = Math.min(1, Math.max(0, -hr.top/innerHeight));
+    wm.style.transform = `translateX(${-hp*7 + mx*-0.6}%)`;
+    const tr = bw.closest('section').getBoundingClientRect();
+    const tc = (tr.top + tr.height/2 - innerHeight/2)/innerHeight;
+    bw.style.transform = `translateX(${tc*14}%)`;
+    titles.forEach(el=>{ const r = el.closest('section').getBoundingClientRect(); const c=(r.top + r.height/2 - innerHeight/2)/innerHeight; el.style.transform=`translateX(${c*-60}px)`; });
+    posts.forEach((p,i)=>{ p.style.transform = `perspective(1000px) rotateX(${-my*5}deg) rotateY(${mx*7}deg) translateY(${Math.sin(t*1.1+i*1.7)*7}px)`; });
+  }
+  requestAnimationFrame(motionLoop);
+})(performance.now());
+
+/* ======================= FIT TEXT ======================= */
+function fitAll(){
+  $$('.fit').forEach(el=>{
+    el.style.fontSize = '100px';
+    const w = el.scrollWidth, target = el.parentElement.clientWidth;
+    let fs = 100*target/w*0.995;
+    if(el.dataset.maxvh) fs = Math.min(fs, innerHeight*(+el.dataset.maxvh));
+    if(w) el.style.fontSize = fs + 'px';
+  });
+}
+fitAll();
+document.fonts && document.fonts.ready.then(fitAll);
+addEventListener('resize', fitAll);
+
+/* ======================= INTRO TAG ======================= */
+const intro = $('#intro'), tag = $('#tag'), str = $('#string'), bar = $('#pullbar'), tagwrap = $('#tagwrap');
+const root = document.documentElement;
+const validHash = ['#ceramide','#retinol','#turmeric','#bag','#hero'].includes(location.hash);
+const T = {y:0,vy:0,a:0,va:0,drag:false,sx:0,sy:0,lx:0,moved:false,released:false};
+const HOLE = 20;
+const tagTop = () => Math.round(innerHeight*0.2);
+const thresh = () => Math.min(170, innerHeight*0.2);
+function unlock(){ root.classList.remove('locked'); window.__motionRefresh && window.__motionRefresh(); }
+function release(){
+  if(T.released) return; T.released = true; T.vy = Math.max(T.vy, 6);
+  intro.classList.add('snap');
+  setTimeout(()=>{ intro.classList.add('gone'); unlock(); }, reduce ? 50 : 480);
+  setTimeout(()=>{ intro.hidden = true; }, reduce ? 400 : 1500);
+}
+if(validHash){ intro.hidden = true; }
+else {
+  root.classList.add('locked');
+  tag.addEventListener('pointerdown',e=>{ if(T.released) return; T.drag=true; T.sx=e.clientX; T.sy=e.clientY; T.lx=e.clientX; T.moved=false; tag.setPointerCapture(e.pointerId); });
+  tag.addEventListener('pointermove',e=>{
+    if(!T.drag) return;
+    const dy = e.clientY - T.sy, dx = e.clientX - T.lx; T.lx = e.clientX;
+    if(Math.abs(dy) + Math.abs(e.clientX - T.sx) > 6) T.moved = true;
+    T.y = dy > 0 ? dy*0.9 : dy*0.15; T.vy = 0;
+    T.va += dx*0.09;
+  });
+  const end = () => { if(!T.drag) return; T.drag=false; if(!T.moved || T.y > thresh()) release(); };
+  tag.addEventListener('pointerup', end); tag.addEventListener('pointercancel', ()=>{T.drag=false;});
+  tag.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); release(); } });
+  $('#skip').addEventListener('click', release);
+  addEventListener('keydown',e=>{ if(!T.released && (e.key==='Escape' || e.key==='ArrowDown')) release(); });
+  intro.addEventListener('wheel',e=>{ if(e.deltaY>8) release(); },{passive:true});
+  (function tagLoop(t){
+    if(intro.hidden) return;
+    if(T.released){ T.vy += 1.5; T.y += T.vy; }
+    else if(!T.drag){ T.vy += -T.y*0.14; T.vy *= 0.74; T.y += T.vy; }
+    const idle = reduce ? 0 : Math.sin(t*0.0013)*2.4;
+    T.va += (idle - T.a)*0.03; T.va *= 0.92; T.a += T.va;
+    const ry = reduce ? 0 : Math.sin(t*0.0006)*24 + T.va*2;
+    tagwrap.style.top = tagTop() + 'px';
+    tag.style.transform = `translate(-50%,${T.y}px) rotate(${T.a}deg) rotateY(${ry}deg)`;
+    if(!T.released) str.style.height = (tagTop()+HOLE+T.y) + 'px';
+    bar.style.transform = `scaleX(${Math.min(1,Math.max(0,T.y/thresh()))})`;
+    requestAnimationFrame(tagLoop);
+  })(0);
+}
+
+/* ======================= 3D STAGE ======================= */
+if(!window.THREE){ $('#stage').hidden = true; return; }
+const canvas = $('#stage');
+let renderer;
+try { renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true, powerPreference:'high-performance'}); }
+catch(e){ canvas.hidden = true; return; }
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.25;
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+camera.position.set(0,0,20);
+let W=1,H=1,halfH=1,halfW=1,upp=1;
+function resize(){
+  W = innerWidth; H = innerHeight;
+  renderer.setSize(W,H,false);
+  camera.aspect = W/H; camera.updateProjectionMatrix();
+  halfH = Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*camera.position.z;
+  halfW = halfH*camera.aspect; upp = 2*halfH/H;
+}
+resize(); addEventListener('resize', resize);
+const toWorld = (px,py) => [ (px/W*2-1)*halfW, -(py/H*2-1)*halfH ];
+
+/* studio environment for glossy reflections */
+{
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const env = new THREE.Scene();
+  env.add(new THREE.Mesh(new THREE.BoxGeometry(30,30,30), new THREE.MeshBasicMaterial({color:0x2c2828, side:THREE.BackSide})));
+  const panel = (w,h,x,y,z,v) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w,h), new THREE.MeshBasicMaterial({color:new THREE.Color(v,v,v), side:THREE.DoubleSide})); m.position.set(x,y,z); m.lookAt(0,0,0); env.add(m); };
+  panel(10,4, 0,10,3, 4); panel(3,12,-11,1,4, 2.4); panel(3,12,11,0,-3, 1.5); panel(12,3, 0,-3,11, .9); panel(4,4, 6,6,9, 2);
+  scene.environment = pmrem.fromScene(env, 0.03).texture;
+}
+scene.add(new THREE.HemisphereLight(0xffffff, 0xd8cfc8, 0.35));
+const key = new THREE.DirectionalLight(0xffffff, 1.1); key.position.set(4,8,10); scene.add(key);
+const rim = new THREE.DirectionalLight(0xfff0e6, 0.6); rim.position.set(-8,2,-6); scene.add(rim);
+
+const V2 = (x,y) => new THREE.Vector2(x,y);
+const rnd = (a,b) => a + Math.random()*(b-a);
+const pick = arr => arr[(Math.random()*arr.length)|0];
+const lin = m => { if(m.color) m.color.convertSRGBToLinear(); return m; };
+const phys = (o) => lin(new THREE.MeshPhysicalMaterial(Object.assign({roughness:.25, metalness:0, clearcoat:1, clearcoatRoughness:.08, envMapIntensity:.9}, o)));
+
+function canvasTex(w,h,draw){
+  const c = document.createElement('canvas'); c.width=w; c.height=h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return t;
+}
+function wrapLabel(radius, height, y, arc, tex){
+  const g = new THREE.CylinderGeometry(radius, radius, height, 96, 1, true, -arc/2 + Math.PI*0, arc);
+  // rotate so the label centre faces +z (camera)
+  const m = new THREE.Mesh(g, new THREE.MeshPhysicalMaterial({map:tex, roughness:.45, clearcoat:.4, clearcoatRoughness:.3, envMapIntensity:.6}));
+  m.position.y = y; return m;
+}
+const fontD = (w,s,it) => `${it?'italic ':''}${w} ${s}px "Poppins", Arial, sans-serif`;
+const fontB = (w,s) => `${w} ${s}px "Poppins", Arial, sans-serif`;
+const fontM = (s) => `500 ${s}px "Poppins", Arial, sans-serif`;
+
+/* ---- dropper bottle ---- */
+function dropper({glass, collar, bulb, label}){
+  const g = new THREE.Group(), inner = new THREE.Group(); g.add(inner);
+  const pts = [V2(0,0), V2(.46,0), V2(.52,.05), V2(.53,1.28)];
+  for(let i=1;i<=10;i++){ const a=i/10*Math.PI/2; pts.push(V2(.2+.33*Math.cos(a), 1.28+.32*Math.sin(a))); }
+  pts.push(V2(.2,1.66), V2(0,1.66));
+  inner.add(new THREE.Mesh(new THREE.LatheGeometry(pts, 72), glass));
+  // collar with ridges
+  const col = new THREE.Mesh(new THREE.CylinderGeometry(.25,.26,.36,64), collar); col.position.y = 1.8; inner.add(col);
+  for(let i=0;i<5;i++){ const r = new THREE.Mesh(new THREE.TorusGeometry(.258,.012,8,64), collar); r.rotation.x=Math.PI/2; r.position.y=1.66+.07*i+.03; inner.add(r); }
+  // rubber bulb
+  const bp = [V2(0,1.96), V2(.19,1.96), V2(.19,2.0), V2(.13,2.06), V2(.14,2.16), V2(.165,2.3), V2(.165,2.42)];
+  for(let i=1;i<=10;i++){ const a=i/10*Math.PI/2; bp.push(V2(.165*Math.cos(a), 2.42+.16*Math.sin(a))); }
+  inner.add(new THREE.Mesh(new THREE.LatheGeometry(bp, 48), bulb));
+  inner.add(wrapLabel(.535, .82, .66, Math.PI*1.25, label));
+  inner.position.y = -1.29;
+  return {group:g, h:2.6};
+}
+/* ---- scrub jar ---- */
+function jar({body, lid, label}){
+  const g = new THREE.Group(), inner = new THREE.Group(); g.add(inner);
+  const bp = [V2(0,0), V2(.76,0), V2(.82,.06), V2(.83,.8), V2(.77,.86), V2(.72,.87), V2(.72,.94), V2(0,.94)];
+  inner.add(new THREE.Mesh(new THREE.LatheGeometry(bp, 80), body));
+  const lp = [V2(0,1.26), V2(.72,1.26), V2(.79,1.23), V2(.825,1.17), V2(.825,.92), V2(.8,.89), V2(0,.89)];
+  inner.add(new THREE.Mesh(new THREE.LatheGeometry(lp, 80), lid));
+  for(let i=0;i<3;i++){ const r=new THREE.Mesh(new THREE.TorusGeometry(.828,.008,6,80), lid); r.rotation.x=Math.PI/2; r.position.y=.97+i*.08; inner.add(r); }
+  inner.add(wrapLabel(.836, .56, .43, Math.PI*1.5, label));
+  inner.position.y = -.63;
+  return {group:g, h:1.26};
+}
+/* ---- shopping bag ---- */
+function shopBag(front){
+  const g = new THREE.Group(), inner = new THREE.Group(); g.add(inner);
+  const red = phys({color:0xD0101A, roughness:.7, clearcoat:0, envMapIntensity:.45});
+  const dark = lin(new THREE.MeshStandardMaterial({color:0x5c0a0d, roughness:.9}));
+  const faceMat = new THREE.MeshPhysicalMaterial({map:front, roughness:.7, clearcoat:0, envMapIntensity:.45});
+  const box = new THREE.Mesh(new THREE.BoxGeometry(2.1,2.4,.9), [red,red,dark,red,faceMat,faceMat]);
+  box.position.y = 1.2; inner.add(box);
+  const rope = lin(new THREE.MeshStandardMaterial({color:0xF1E7DA, roughness:.8}));
+  [.26,-.26].forEach(z=>{
+    const curve = new THREE.CatmullRomCurve3([new THREE.Vector3(-.5,2.3,z), new THREE.Vector3(-.42,2.95,z), new THREE.Vector3(0,3.2,z), new THREE.Vector3(.42,2.95,z), new THREE.Vector3(.5,2.3,z)]);
+    inner.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 48, .035, 10, false), rope));
+    [-.5,.5].forEach(x=>{ const k=new THREE.Mesh(new THREE.SphereGeometry(.06,16,12), rope); k.position.set(x,2.28,z+(z>0?.02:-.02)); inner.add(k); });
+  });
+  inner.position.y = -1.6;
+  return {group:g, h:3.2};
+}
+
+/* ---- labels (need fonts) ---- */
+function labelCer(){ return canvasTex(1024, 420, (c,w,h)=>{
+  c.fillStyle='#FBFCFD'; c.fillRect(0,0,w,h);
+  c.fillStyle='#8DB7DD'; c.fillRect(0,h-64,w,64);
+  c.textAlign='center'; c.fillStyle='#2F4C68';
+  c.font=fontM(22); c.fillText('Nº 01 — BARRIER', w/2, 70);
+  c.font=fontD(800,112,false); c.fillText('Ceramide', w/2, 205);
+  c.font=fontD(300,32,true); c.fillStyle='#55697d'; c.fillText('nourish + restore serum', w/2, 270);
+  c.fillStyle='#fff'; c.font=fontM(24); c.fillText('30 ML  ·  1.0 FL OZ', w/2, h-23);
+}); }
+function labelRet(){ return canvasTex(1024, 420, (c,w,h)=>{
+  c.fillStyle='#F6EFE4'; c.fillRect(0,0,w,h);
+  c.fillStyle='#4A2448'; c.fillRect(0,h-64,w,64);
+  c.textAlign='center'; c.fillStyle='#4A2448';
+  c.font=fontM(22); c.fillText('Nº 02 — RENEWAL', w/2, 70);
+  c.font=fontD(800,118,false); c.fillText('Retinol', w/2, 205);
+  c.font=fontD(300,32,true); c.fillStyle='#7a5a6f'; c.fillText('renew & radiance serum', w/2, 270);
+  c.fillStyle='#E3A93B'; c.font=fontM(24); c.fillText('30 ML  ·  PM USE', w/2, h-23);
+}); }
+function labelTur(){ return canvasTex(2048, 300, (c,w,h)=>{
+  c.fillStyle='#FFF7E8'; c.fillRect(0,0,w,h);
+  c.fillStyle='#A8460C'; c.fillRect(0,0,w,14); c.fillRect(0,h-14,w,14);
+  c.textAlign='center'; c.fillStyle='#A8460C';
+  c.font=fontD(900,112,false); c.fillText('TURMERIC', w/2, 150);
+  c.font=fontM(26); c.fillStyle='#8a5a2c'; c.fillText('SALT SCRUB  ·  BODY  ·  450 ML', w/2, 220);
+}); }
+function labelBag(){ return canvasTex(840, 960, (c,w,h)=>{
+  c.fillStyle='#E0161E'; c.fillRect(0,0,w,h);
+  c.textBaseline='alphabetic';
+  c.font=fontD(200,180,true); const a=c.measureText('chi').width;
+  c.font=fontD(900,180,false); const b=c.measureText('NOX').width;
+  let x=(w-a-b+10)/2, y=h*0.55;
+  c.font=fontD(200,180,true); c.fillStyle='#fff'; c.fillText('chi', x, y);
+  c.font=fontD(900,180,false); c.fillStyle='#2B2829'; c.fillText('NOX', x+a-10, y);
+  c.textAlign='center'; c.fillStyle='#fff';
+  c.font=fontD(500,30,false); c.fillText('C  O  S  M  E  T  I  C  S', w/2, y+70);
+  c.font=fontB(600,22); c.globalAlpha=.85; c.fillText('AUTHENTIC SKINCARE  ·  UK  ·  US  ·  KOREA', w/2, h-70);
+}); }
+
+/* ---- particles ---- */
+function lathePts(fn, n){ const p=[]; for(let i=0;i<=n;i++) p.push(fn(i/n)); return p; }
+const GEO = {
+  pearl: new THREE.SphereGeometry(.5, 28, 18),
+  drop: new THREE.LatheGeometry(lathePts(t=>{ const a=t*Math.PI; return V2(Math.sin(a)*.5*Math.pow(Math.sin(a/2),.6), -Math.cos(a)*.6 + (t<.5? .0:0)); },24), 32),
+  capsule: new THREE.LatheGeometry(lathePts(t=>{ if(t<.3){const a=t/.3*Math.PI/2; return V2(Math.sin(a)*.32, -.45-Math.cos(a)*.32+.32*0 - .0);} if(t>.7){const a=(1-t)/.3*Math.PI/2; return V2(Math.sin(a)*.32, .45+Math.cos(a)*.32);} return V2(.32, -.45+(t-.3)/.4*.9); },30), 32),
+  chunk: new THREE.DodecahedronGeometry(.5, 0),
+  salt: new THREE.OctahedronGeometry(.5, 0),
+  leaf: new THREE.SphereGeometry(.5, 16, 10),
+};
+function makeSet(specs){
+  const set = {group:new THREE.Group(), meshes:[], a:0, av:0};
+  specs.forEach(sp=>{
+    const m = new THREE.InstancedMesh(sp.geo, sp.mat, sp.n);
+    m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); m.frustumCulled = false;
+    const items = [];
+    for(let i=0;i<sp.n;i++){
+      let hx=rnd(-1,1), hy=rnd(-1,1);
+      if(Math.abs(hx)<.28 && Math.abs(hy)<.35){ hx += hx<0?-.35:.35; }
+      items.push({hx, hy, hz:rnd(-7,3.5), s:rnd(sp.min,sp.max), sv:sp.shape?sp.shape():[1,1,1], rx:rnd(0,6.3), ry:rnd(0,6.3), rz:rnd(0,6.3), sr:rnd(-.9,.9), ph:rnd(0,6.3)});
+      m.setColorAt(i, new THREE.Color(pick(sp.colors)).convertSRGBToLinear());
+    }
+    m.instanceColor.needsUpdate = true;
+    set.group.add(m); set.meshes.push({m, items});
+  });
+  scene.add(set.group); return set;
+}
+const white = o => phys(Object.assign({color:0xffffff}, o));
+const isMobile = () => innerWidth < 700;
+const N = isMobile() ? .6 : 1;
+const sets = {
+  cer: makeSet([
+    {geo:GEO.pearl, mat:white({roughness:.15}), n:Math.round(16*N), min:.18, max:.5, colors:['#ffffff','#EAF2FA','#CFE2F3']},
+    {geo:GEO.drop, mat:white({roughness:.03, clearcoat:1}), n:Math.round(12*N), min:.25, max:.55, colors:['#BBD6EE','#DDEBF7','#8DB7DD']},
+  ]),
+  ret: makeSet([
+    {geo:GEO.capsule, mat:white({roughness:.06}), n:Math.round(18*N), min:.28, max:.6, colors:['#F2B33D','#E39A1F','#F7CB6A']},
+    {geo:GEO.pearl, mat:white({roughness:.2}), n:Math.round(10*N), min:.12, max:.3, colors:['#D8C2E3','#BFA2CF','#ffffff']},
+  ]),
+  tur: makeSet([
+    {geo:GEO.chunk, mat:white({roughness:.75, clearcoat:.1}), n:Math.round(18*N), min:.25, max:.6, colors:['#D9781C','#E8902A','#C8641A'], shape:()=>[rnd(1.2,2),rnd(.6,.9),rnd(.6,.9)]},
+    {geo:GEO.salt, mat:white({roughness:.15, clearcoat:1}), n:Math.round(16*N), min:.12, max:.32, colors:['#ffffff','#FBF3E4','#F1E4CC']},
+  ]),
+};
+const dummy = new THREE.Object3D();
+function updateSet(set, active, cx, cy, secOff, t, dt, mx, my){
+  const target = active ? 1 : 0;
+  const k = Math.min(1, dt*60);
+  set.av += (target - set.a)*0.05*k; set.av *= Math.pow(0.86, k); set.a += set.av;
+  const a = Math.max(0, set.a);
+  set.group.visible = a > 0.004;
+  if(!set.group.visible) return;
+  const spread = Math.min(1.15, a);
+  for(const {m, items} of set.meshes){
+    items.forEach((it,i)=>{
+      const depth = (it.hz + 7)/10.5;
+      const hx = it.hx*halfW*.98, hy = it.hy*halfH*.92 + secOff*(0.7+0.6*depth);
+      const bob = reduce ? 0 : Math.sin(t*.6 + it.ph)*.18;
+      dummy.position.set(cx + (hx-cx)*spread + mx*depth*.6, cy + (hy-cy)*spread + bob + my*depth*.4, it.hz*Math.min(1,a));
+      dummy.rotation.set(it.rx + t*it.sr*.4, it.ry + t*it.sr*.5, it.rz);
+      const s = it.s * Math.min(1, a*1.1);
+      dummy.scale.set(s*it.sv[0], s*it.sv[1], s*it.sv[2]);
+      dummy.updateMatrix(); m.setMatrixAt(i, dummy.matrix);
+    });
+    m.instanceMatrix.needsUpdate = true;
+  }
+}
+
+/* ---- build products once fonts are ready ---- */
+const objs = {};
+function addObj(id, built){
+  const o = {id, ...built, x:0, y:-halfH*1.6, s:0, rz:0, rx:0, spin:0, spinT:0, drag:0, dragV:0, lastX:null};
+  o.group.scale.setScalar(0.0001); scene.add(o.group); objs[id] = o;
+}
+function buildAll(){
+  if(objs.cer) return;
+  addObj('cer', dropper({
+    glass: phys({color:0xF1F4F7, roughness:.42, clearcoat:1, clearcoatRoughness:.15}),
+    collar: phys({color:0x8DB7DD, roughness:.25}),
+    bulb: phys({color:0xF7F7F5, roughness:.55, clearcoat:.3}),
+    label: labelCer()
+  }));
+  addObj('ret', dropper({
+    glass: phys({color:0x9a4a10, roughness:.08, clearcoat:1, clearcoatRoughness:.02, envMapIntensity:1.5}),
+    collar: phys({color:0x1d1b1c, roughness:.2}),
+    bulb: phys({color:0x232022, roughness:.5, clearcoat:.35}),
+    label: labelRet()
+  }));
+  addObj('tur', jar({
+    body: phys({color:0xE48A25, roughness:.18, clearcoat:1, clearcoatRoughness:.05}),
+    lid: phys({color:0xF6F2EC, roughness:.3}),
+    label: labelTur()
+  }));
+  addObj('bag', shopBag(labelBag()));
+}
+const fontLoads = ['200 italic 100px "Poppins"','300 italic 32px "Poppins"','500 30px "Poppins"','600 22px "Poppins"','800 100px "Poppins"','900 100px "Poppins"'];
+Promise.race([
+  Promise.all(fontLoads.map(f=>document.fonts.load(f))).catch(()=>{}),
+  new Promise(r=>setTimeout(r, 2500))
+]).then(buildAll);
+
+/* ---- anchors per scene ---- */
+const scenes = $$('[data-scene]');
+const anchors = {}; // scene -> id -> el
+scenes.forEach(s=>{ anchors[s.dataset.scene] = {}; $$('[data-anchor]', s).forEach(a=>anchors[s.dataset.scene][a.dataset.anchor] = a); });
+const BG = { hero:'#F7F5F2', cer:'#E3ECF4', ret:'#EDE3F0', tur:'#F7E2B2', bag:'#F4EEEA', foot:'#F4EEEA' };
+const bgCur = new THREE.Color(BG.hero), bgTmp = new THREE.Color();
+let current = 'hero';
+function activeScene(){
+  const mid = innerHeight*.5;
+  for(const s of scenes){ const r = s.getBoundingClientRect(); if(r.top <= mid && r.bottom > mid) return s; }
+  return scenes[0];
+}
+
+/* ---- drag to spin ---- */
+let dragId = null, dragX = 0;
+$$('[data-anchor]').forEach(el=>{
+  el.addEventListener('pointerdown', e=>{ dragId = el.dataset.anchor; dragX = e.clientX; });
+});
+addEventListener('pointermove', e=>{
+  mouse.tx = (e.clientX/innerWidth)*2-1; mouse.ty = -((e.clientY/innerHeight)*2-1);
+  if(dragId && objs[dragId]){ const dx = e.clientX - dragX; dragX = e.clientX; objs[dragId].drag += dx*0.012; objs[dragId].dragV = dx*0.012; }
+});
+addEventListener('pointerup', ()=>{ dragId = null; });
+addEventListener('pointercancel', ()=>{ dragId = null; });
+const mouse = {x:0,y:0,tx:0,ty:0};
+window.__spin = id => { if(objs[id]) objs[id].spinT += Math.PI*2; };
+
+/* ---- main loop ---- */
+let last = performance.now();
+function frame(now){
+  const dt = Math.min(0.05, (now-last)/1000); last = now; const t = now/1000;
+  const sec = activeScene(); const sc = sec.dataset.scene;
+  if(sc !== current){
+    // spin products that enter their own chapter
+    if(objs[sc]) objs[sc].spinT += Math.PI*2;
+    current = sc;
+    $$('.bag').forEach(b=>b.classList.toggle('on', sc==='bag'));
+  }
+  if(sc==='bag') $('#bag').classList.add('on');
+  // background
+  bgTmp.set(BG[sc] || BG.hero); bgCur.lerp(bgTmp, 1-Math.exp(-dt*3));
+  document.body.style.background = '#' + bgCur.getHexString();
+  mouse.x += (mouse.tx-mouse.x)*(1-Math.exp(-dt*3)); mouse.y += (mouse.ty-mouse.y)*(1-Math.exp(-dt*3));
+
+  const kPos = 1-Math.exp(-dt*7), kScale = 1-Math.exp(-dt*5), kRot = 1-Math.exp(-dt*4);
+  const bagEl = anchors.bag && anchors.bag.bag;
+  for(const id in objs){
+    const o = objs[id];
+    const el = anchors[sc] && anchors[sc][id];
+    let tx=o.x, ty=o.y, ts=0, trz=o.rz, trx=0;
+    if(el){
+      const r = el.getBoundingClientRect();
+      [tx,ty] = toWorld(r.left+r.width/2, r.top+r.height/2);
+      ts = (r.height*upp*(+el.dataset.fit||1))/o.h;
+      trz = +el.dataset.rz || 0; trx = +el.dataset.rx || 0;
+      o.lastX = tx;
+    } else if(sc==='bag' && bagEl && id!=='bag'){
+      const r = bagEl.getBoundingClientRect();
+      [tx,ty] = toWorld(r.left+r.width/2, r.top+r.height*.25); ts = 0;
+    } else {
+      ty = o.y + 0; ts = 0;
+    }
+    o.x += (tx-o.x)*kPos; o.y += (ty-o.y)*kPos;
+    o.s += (ts-o.s)*kScale; o.rz += (trz-o.rz)*kRot; o.rx += (trx-o.rx)*kRot;
+    o.spin += (o.spinT-o.spin)*(1-Math.exp(-dt*2.6));
+    if(dragId!==id){ o.dragV *= Math.pow(0.92, dt*60); o.drag += o.dragV; }
+    const idle = reduce ? 0 : Math.sin(t*.55 + id.length)*.55;
+    const g = o.group;
+    g.position.set(o.x, o.y + (reduce?0:Math.sin(t*1.1+id.charCodeAt(0))*.05*o.s*o.h), 0);
+    g.scale.setScalar(Math.max(0.0001, o.s));
+    g.rotation.set(o.rx + mouse.y*-.12, idle + o.spin + o.drag + mouse.x*.25, o.rz, 'XYZ');
+    g.visible = o.s > 0.002;
+  }
+  // particles
+  const secRect = sec.getBoundingClientRect();
+  const secOff = -((secRect.top + secRect.height/2) - innerHeight/2)*upp*0.5;
+  for(const k in sets){
+    const o = objs[k];
+    updateSet(sets[k], sc===k && !!o, o?o.x:0, o?o.y:0, secOff, t, dt, mouse.x, mouse.y);
+  }
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
