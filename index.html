@@ -378,7 +378,7 @@ body{position:relative}
       <div class="tag-face b"><small>Pull to open</small><p>Glow <em>all year</em> round.</p><small>Since 2024</small></div>
     </div>
   </div>
-  <div class="intro-hint"><span>Hold &amp; pull the tag down</span><span class="track"><i id="pullbar"></i></span></div>
+  <div class="intro-hint"><span>Scroll or pull the tag down</span><span class="track"><i id="pullbar"></i></span></div>
   <button class="skip" id="skip" type="button">Skip intro</button>
 </div>
 
@@ -1053,16 +1053,18 @@ render(true);
 
 /* ======================= INTRO TAG ======================= */
 const intro=$('#intro'), tag=$('#tag'), str=$('#string'), bar=$('#pullbar'), tagwrap=$('#tagwrap');
-const T={y:0,vy:0,a:0,va:0,drag:false,sx:0,sy:0,lx:0,moved:false,released:false};
+const T={y:0,vy:0,a:0,va:0,drag:false,sx:0,sy:0,lx:0,moved:false,released:false,held:0};
+const startHash = location.hash;
+if('scrollRestoration' in history) history.scrollRestoration = 'manual';
 const tagTop=()=>Math.round(innerHeight*.2), thresh=()=>Math.min(170, innerHeight*.2);
 function release(){
   if(T.released) return; T.released=true; T.vy=Math.max(T.vy,6);
   intro.classList.add('snap');
-  setTimeout(()=>{ intro.classList.add('gone'); root.classList.remove('locked'); }, reduce?50:420);
+  setTimeout(()=>{ intro.classList.add('gone'); root.classList.remove('locked'); const tg = startHash && document.getElementById(startHash.slice(1)); if(tg) tg.scrollIntoView({behavior:'auto'}); else scrollTo(0,0); }, reduce?50:420);
   setTimeout(()=>{ intro.hidden=true; }, reduce?400:1300);
 }
-if(location.hash){ intro.hidden=true; }
-else {
+{
+  if(startHash) history.replaceState(null, '', location.pathname + location.search);
   root.classList.add('locked');
   tag.addEventListener('pointerdown',e=>{ if(T.released) return; T.drag=true; T.sx=e.clientX; T.sy=e.clientY; T.lx=e.clientX; T.moved=false; tag.setPointerCapture(e.pointerId); });
   tag.addEventListener('pointermove',e=>{ if(!T.drag) return; const dy=e.clientY-T.sy, dx=e.clientX-T.lx; T.lx=e.clientX; if(Math.abs(dy)+Math.abs(e.clientX-T.sx)>6) T.moved=true; T.y = dy>0 ? dy*.9 : dy*.15; T.vy=0; T.va+=dx*.09; });
@@ -1071,11 +1073,17 @@ else {
   tag.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); release(); } });
   $('#skip').addEventListener('click', release);
   addEventListener('keydown',e=>{ if(!T.released && (e.key==='Escape'||e.key==='ArrowDown')) release(); });
-  intro.addEventListener('wheel',e=>{ if(e.deltaY>8) release(); },{passive:true});
+  /* scrolling (wheel or swipe) pulls the tag down; past the line it drops and the site opens */
+  const pull = d => { if(T.released) return; T.y = Math.max(0, T.y + d); T.vy = 0; T.va += (Math.random()-.5)*.6; T.held = performance.now(); if(T.y > thresh()) release(); };
+  intro.addEventListener('wheel', e=>{ e.preventDefault(); pull(Math.max(-40, Math.min(40, e.deltaY))*.55); }, {passive:false});
+  let ty0 = null;
+  intro.addEventListener('touchstart', e=>{ if(e.target.closest('.tag')) return; ty0 = e.touches[0].clientY; }, {passive:true});
+  intro.addEventListener('touchmove', e=>{ if(ty0===null) return; const y = e.touches[0].clientY; pull((ty0 - y)*.8); ty0 = y; }, {passive:true});
+  intro.addEventListener('touchend', ()=>{ ty0 = null; });
   (function tagLoop(t){
     if(intro.hidden) return;
     if(T.released){ T.vy+=1.5; T.y+=T.vy; }
-    else if(!T.drag){ T.vy+=-T.y*.14; T.vy*=.74; T.y+=T.vy; }
+    else if(!T.drag && t - T.held > 180){ T.vy+=-T.y*.08; T.vy*=.8; T.y+=T.vy; }
     const idle = reduce?0:Math.sin(t*.0013)*2.4;
     T.va+=(idle-T.a)*.03; T.va*=.92; T.a+=T.va;
     const ry = reduce?0:Math.sin(t*.0006)*24 + T.va*2;
